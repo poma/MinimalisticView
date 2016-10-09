@@ -1,0 +1,142 @@
+﻿<ResourceDictionary x:Class="MinimalisticView.StyleOverrides" x:ClassModifier="public"
+										xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+										xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+										xmlns:local="clr-namespace:MinimalisticView"
+										xmlns:cm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
+										xmlns:vs="clr-namespace:Microsoft.VisualStudio.PlatformUI.Shell.Controls;assembly=Microsoft.VisualStudio.Shell.ViewManager"
+										xmlns:ui="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.14.0"
+										xmlns:vsshell="clr-namespace:Microsoft.VisualStudio.PlatformUI.Shell;assembly=Microsoft.VisualStudio.Shell.ViewManager"
+										xmlns:vsinternal="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.UI.Internal">
+	<!-- Just squash everything to 0 height to avoid breaking stuff -->
+	<Style TargetType="{x:Type vsinternal:MainWindowTitleBar}">
+		<Setter Property="Height" Value="{Binding Height, Source={x:Static local:StyleOverrides.Instance}}" />
+	</Style>
+	<Style TargetType="{x:Type vsinternal:VsMenu}">
+		<Setter Property="Height" Value="{Binding Height, Source={x:Static local:StyleOverrides.Instance}}" />
+		<EventSetter Event="GotFocus" Handler="Menu_GotFocus" />
+		<EventSetter Event="GotKeyboardFocus" Handler="Menu_GotFocus" />
+		<EventSetter Event="LostKeyboardFocus" Handler="Menu_LostFocus" />
+	</Style>
+	<!-- Too bad that MS decided to mark this class as internal -->
+	<!--Style TargetType="{x:Type vsinternal:FrameControlContainer}">
+		<Setter Property="Height" Value="{Binding Height, Source={x:Static local:StyleOverrides.Instance}}" />
+	</Style-->
+
+	<!-- This is almost unchanged source style -->
+	<Style TargetType="{x:Type vs:DocumentGroupControl}">
+		<Style.Resources>
+			<DataTemplate DataType="{x:Type vsshell:View}">
+				<vs:ViewPresenter Content="{Binding Content}" View="{Binding}" ContainingElement="{Binding}"/>
+			</DataTemplate>
+			<vs:MenuItemIconConverter x:Key="MenuItemIconConverter"/>
+			<ui:BooleanToHiddenVisibilityConverter x:Key="BooleanToHiddenVisibilityConverter"/>
+		</Style.Resources>
+		<Setter Property="InputMethod.IsInputMethodSuspended" Value="true"/>
+		<!-- Changed to specific color because I don't know how to apply theme color -->
+		<Setter Property="Control.BorderBrush" Value="#3f3f46"/>
+		<Setter Property="Control.Background" Value="White"/>
+		<Setter Property="Control.BorderThickness" Value="1"/>
+		<Setter Property="Control.Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="{x:Type vs:DocumentGroupControl}">
+					<vs:DockTarget x:Name="MainDockTarget" DockSiteType="NonDraggable" DockTargetType="Inside"
+												 Background="Transparent">
+						<DockPanel SnapsToDevicePixels="true">
+							<Grid KeyboardNavigation.TabNavigation="Local">
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition x:Uid="TabsColumn" Width="*"/>
+									<ColumnDefinition x:Uid="OverflowColumn" Width="Auto"/>
+								</Grid.ColumnDefinitions>
+								<Grid.RowDefinitions>
+									<!-- Changed from auto to 0 -->
+									<RowDefinition x:Uid="TabsRow" Height="0"/>
+									<RowDefinition x:Uid="ContentRow" Height="*"/>
+								</Grid.RowDefinitions>
+								<vs:DockTarget x:Name="InsertTabPreviewDockTarget" DockTargetType="InsertTabPreview" Grid.Column="0" Grid.Row="0"
+															 Background="White" AdornmentTarget="{Binding ElementName=MainDockTarget}">
+									<vs:DocumentTabPanel x:Name="PART_TabPanel" ZIndex="1" KeyboardNavigation.TabIndex="1" Margin="2,2,2,0"
+																			 IsItemsHost="true" ExpandedTearOffMargin="50"/>
+								</vs:DockTarget>
+								<DockPanel Margin="0,0,0,3" LastChildFill="false" Grid.Row="0" Grid.Column="1">
+									<vs:DropDownButton x:Name="PART_TabPopupButton" ClickMode="Press" Width="14" Height="14" DockPanel.Dock="Bottom"
+																		 HoverBorderBrush="#3399FF" HoverBorderThickness="1" PressedBorderBrush="#006CD8"
+																		 PressedBorderThickness="1"
+																		 IsChecked="{Binding Path=ContextMenu.IsOpen, RelativeSource={RelativeSource Self}}">
+										<FrameworkElement.Resources>
+											<CollectionViewSource x:Key="ContextMenuItemSource" Source="{Binding Path=VisibleChildren}">
+												<CollectionViewSource.SortDescriptions>
+													<cm:SortDescription Direction="Ascending" PropertyName="Title.Title"/>
+												</CollectionViewSource.SortDescriptions>
+											</CollectionViewSource>
+										</FrameworkElement.Resources>
+										<vs:GlyphButton.HoverBackground>
+											<LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+												<GradientStop Color="#C3E6F4" Offset="0"/>
+												<GradientStop Color="#C3E6F4" Offset="0.5"/>
+												<GradientStop Color="#B6E4F7" Offset="0.5"/>
+												<GradientStop Color="#B6E4F7" Offset="1"/>
+											</LinearGradientBrush>
+										</vs:GlyphButton.HoverBackground>
+										<vs:GlyphButton.PressedBackground>
+											<LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+												<GradientStop Color="#D2E9F2" Offset="0"/>
+												<GradientStop Color="#D2E9F2" Offset="0.5"/>
+												<GradientStop Color="#C3E6F4" Offset="0.5"/>
+												<GradientStop Color="#C3E6F4" Offset="1"/>
+											</LinearGradientBrush>
+										</vs:GlyphButton.PressedBackground>
+										<StackPanel Orientation="Vertical" Width="8" Height="8">
+											<Path x:Name="DropDownButtonBar" Fill="#222222" Width="8" Height="4" Data="M 0,0 L 8,0 8,2 0,2 0,0 "
+														SnapsToDevicePixels="true"
+														Visibility="{Binding ElementName=PART_TabPanel, Path=HasOverflowItems, Converter={StaticResource BooleanToHiddenVisibilityConverter}}"/>
+											<Path Fill="#222222" Width="8" Height="4" Data="F1 M 0,0 L 4,4 8,0 0,0 Z" SnapsToDevicePixels="true"/>
+										</StackPanel>
+										<FrameworkElement.ContextMenu>
+											<ContextMenu DataContext="{StaticResource ContextMenuItemSource}" IsTextSearchEnabled="true"
+																	 TextSearch.TextPath="Title.Title" ItemsSource="{Binding}">
+												<ItemsControl.ItemContainerStyle>
+													<Style TargetType="{x:Type MenuItem}">
+														<Setter Property="HeaderedItemsControl.Header" Value="{Binding Path=Title.Title}"/>
+														<Setter Property="MenuItem.Icon"
+																		Value="{Binding Path=Title.Icon, Converter={StaticResource MenuItemIconConverter}}"/>
+														<Setter Property="MenuItem.Command" Value="{x:Static vs:ViewCommands.ActivateDocumentViewCommand}"/>
+														<Setter Property="MenuItem.CommandParameter" Value="{Binding}"/>
+													</Style>
+												</ItemsControl.ItemContainerStyle>
+												<ItemsControl.ItemTemplate>
+													<DataTemplate DataType="{x:Type vsshell:View}">
+														<ContentPresenter Content="{Binding}"/>
+													</DataTemplate>
+												</ItemsControl.ItemTemplate>
+											</ContextMenu>
+										</FrameworkElement.ContextMenu>
+									</vs:DropDownButton>
+								</DockPanel>
+								<Border x:Name="PART_ContentPanel" Background="{TemplateBinding Control.Background}"
+												BorderThickness="{TemplateBinding Control.BorderThickness}"
+												BorderBrush="{TemplateBinding Control.BorderBrush}" KeyboardNavigation.TabNavigation="Local"
+												KeyboardNavigation.DirectionalNavigation="Contained" KeyboardNavigation.TabIndex="2"
+												Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2">
+									<ContentPresenter x:Name="PART_SelectedContentHost"
+																		SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}"
+																		Margin="{TemplateBinding Control.Padding}" ContentSource="SelectedContent"/>
+								</Border>
+							</Grid>
+						</DockPanel>
+					</vs:DockTarget>
+					<ControlTemplate.Triggers>
+						<Trigger Property="UIElement.IsEnabled" Value="false">
+							<Setter Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" Property="Control.Foreground"/>
+						</Trigger>
+						<DataTrigger Value="True"
+												 Binding="{Binding Source={x:Static vsshell:ViewManager.Instance}, Path=Preferences.AllowDocumentTabAutoDocking}">
+							<Setter TargetName="InsertTabPreviewDockTarget" Property="vs:DockTarget.DockTargetType" Value="Auto"/>
+						</DataTrigger>
+					</ControlTemplate.Triggers>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+		<Setter Property="ItemsControl.ItemTemplate"
+						Value="{DynamicResource {x:Static vs:DocumentGroupControl.ItemTemplateKey}}"/>
+	</Style>
+</ResourceDictionary>
