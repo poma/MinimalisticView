@@ -15,7 +15,7 @@ using Microsoft.VisualStudio.Shell.Interop;
 namespace MinimalisticView
 {
 	[PackageRegistration(UseManagedResourcesOnly = true)]
-	[InstalledProductRegistration("#110", "#112", "2.0", IconResourceID = 400)] // Info on this package for Help/About
+	[InstalledProductRegistration("#110", "#112", "2.1", IconResourceID = 400)] // Info on this package for Help/About
 	[Guid(MinimalisticView.PackageGuidString)]
 	[ProvideAutoLoad(UIContextGuids.NoSolution)]
 	[ProvideAutoLoad(UIContextGuids.SolutionExists)]

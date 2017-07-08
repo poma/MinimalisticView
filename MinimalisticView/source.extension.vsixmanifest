@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
   <Metadata>
-    <Identity Id="MinimalisticView.Company.ba901288-7632-4116-b9e7-c9d29f495474" Version="2.0" Language="en-US" Publisher="Company" />
+    <Identity Id="MinimalisticView.Company.ba901288-7632-4116-b9e7-c9d29f495474" Version="2.1" Language="en-US" Publisher="Poma" />
     <DisplayName>MinimalisticView</DisplayName>
     <Description xml:space="preserve">Minimalistic UI for Visual Studio</Description>
   </Metadata>

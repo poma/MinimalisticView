@@ -22,7 +22,8 @@
         </ResourceDictionary>
       </Style.Resources>
       <Setter Property="InputMethod.IsInputMethodSuspended" Value="True" />
-      <Setter Property="Control.BorderBrush" Value="#FFA9A9A9" />
+      <!-- Changed to specific color because I don't know how to apply theme color -->
+      <Setter Property="Control.BorderBrush" Value="#FF3F3F46" />
       <Setter Property="Control.Background" Value="#FFFFFFFF" />
       <Setter Property="Control.BorderThickness" Value="1" />
       <Setter Property="Control.Template">
