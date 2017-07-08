@@ -41,6 +41,24 @@ namespace MinimalisticView
 			}
 		}
 
+		bool _hideMenuOnly = false;
+		[DisplayName("Hide menu only")]
+		[Description("Hide menu bar but leave title bar visible")]
+		public bool HideMenuOnly
+		{
+			get {
+				return _hideMenuOnly;
+			}
+			set {
+				if (_hideMenuOnly == value) {
+					return;
+				}
+
+				_hideMenuOnly = value;
+				PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(HideMenuOnly)));
+			}
+		}
+
 		int _collapsedTitleHeight = 2;
 		[DisplayName("Collapsed title height")]
 		[Description("Height of collapsed title bar. If set to zero removes it completely but menu cannot expand on mouse over.")]

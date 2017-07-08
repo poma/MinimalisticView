@@ -15,7 +15,7 @@ using Microsoft.VisualStudio.Shell.Interop;
 namespace MinimalisticView
 {
 	[PackageRegistration(UseManagedResourcesOnly = true)]
-	[InstalledProductRegistration("#110", "#112", "2.1", IconResourceID = 400)] // Info on this package for Help/About
+	[InstalledProductRegistration("#110", "#112", "2.2", IconResourceID = 400)] // Info on this package for Help/About
 	[Guid(MinimalisticView.PackageGuidString)]
 	[ProvideAutoLoad(UIContextGuids.NoSolution)]
 	[ProvideAutoLoad(UIContextGuids.SolutionExists)]
@@ -35,8 +35,8 @@ namespace MinimalisticView
 				if (_isMenuVisible == value)
 					return;
 				_isMenuVisible = value;
-				UpdateElementHeight(_menuBar);
-				UpdateElementHeight(_titleBar, Options.CollapsedTitleHeight);
+				UpdateMenuHeight();
+				UpdateTitleHeight();
 			}
 		}
 
@@ -48,7 +48,7 @@ namespace MinimalisticView
 			}
 			set {
 				_menuBar = value;
-				UpdateElementHeight(_menuBar);
+				UpdateMenuHeight();
 				AddElementHandlers(_menuBar);
 			}
 		}
@@ -61,7 +61,7 @@ namespace MinimalisticView
 			}
 			set {
 				_titleBar = value;
-				UpdateElementHeight(_titleBar, Options.CollapsedTitleHeight);
+				UpdateTitleHeight();
 				AddElementHandlers(_titleBar);
 			}
 		}
@@ -90,6 +90,20 @@ namespace MinimalisticView
 		private NonClientMouseTracker _nonClientTracker;
 		private Window _mainWindow;
 		
+
+		void UpdateMenuHeight()
+		{
+			UpdateElementHeight(_menuBar);
+		}
+
+		void UpdateTitleHeight()
+		{
+			if (!Options.HideMenuOnly) {
+				UpdateElementHeight(_titleBar, Options.CollapsedTitleHeight);
+			} else {
+				_titleBar.ClearValue(FrameworkElement.HeightProperty);
+			}			
+		}
 
 		void UpdateElementHeight(FrameworkElement element, double collapsedHeight = 0)
 		{
@@ -128,15 +142,15 @@ namespace MinimalisticView
 		private async void OnIsMouseOverChanged(object sender, MouseEventArgs e)
 		{
 			await System.Threading.Tasks.Task.Delay(1); // Workaround for mouse transition issues between client and non-client area (when both areas have IsMouseOver set to false)
-			IsMenuVisible = (_titleBar?.IsMouseOver ?? false) || (_menuBar?.IsMouseOver ?? false) || _nonClientTracker.IsMouseOver || IsAggregateFocusInMenuContainer();
+			IsMenuVisible = ((_titleBar?.IsMouseOver ?? false) && !Options.HideMenuOnly) || (_menuBar?.IsMouseOver ?? false) || (_nonClientTracker.IsMouseOver && !Options.HideMenuOnly) || IsAggregateFocusInMenuContainer();
 		}
 
 		private bool IsAggregateFocusInMenuContainer()
 		{
-			if (MenuBar.IsKeyboardFocusWithin || TitleBar.IsKeyboardFocusWithin)
+			if (MenuBar.IsKeyboardFocusWithin || (TitleBar.IsKeyboardFocusWithin && !Options.HideMenuOnly))
 				return true;
 			for (DependencyObject sourceElement = (DependencyObject)Keyboard.FocusedElement; sourceElement != null; sourceElement = sourceElement.GetVisualOrLogicalParent()) {
-				if (sourceElement == MenuBar || sourceElement == TitleBar)
+				if (sourceElement == MenuBar || (sourceElement == TitleBar && !Options.HideMenuOnly))
 					return true;
 			}
 			return false;
@@ -183,8 +197,9 @@ namespace MinimalisticView
 					UpdateElementHeight(_titleBar, Options.CollapsedTitleHeight);
 					break;
 				case nameof(Options.TitleBarAutoHide):
-					UpdateElementHeight(_menuBar);
-					UpdateElementHeight(_titleBar, Options.CollapsedTitleHeight);
+				case nameof(Options.HideMenuOnly):
+					UpdateMenuHeight();
+					UpdateTitleHeight();
 					break;
 				case nameof(Options.HideTabs):
 					var dics = Application.Current.Resources.MergedDictionaries;
