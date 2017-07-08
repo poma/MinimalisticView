@@ -1,48 +1,153 @@
-﻿//------------------------------------------------------------------------------
-// <copyright file="MinimalisticView.cs" company="Company">
-//     Copyright (c) Company.  All rights reserved.
-// </copyright>
-//------------------------------------------------------------------------------
-
-using System;
+﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Security;
 using System.Windows;
+using System.Windows.Input;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.VisualStudio.PlatformUI;
+using Microsoft.Win32;
+using System.Windows.Media;
+using System.Windows.Controls;
+using System.Windows.Automation;
+using System.Diagnostics;
+using System.Globalization;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Windows.Interop;
 
 namespace MinimalisticView
 {
-	/// <summary>
-	/// This is the class that implements the package exposed by this assembly.
-	/// </summary>
-	/// <remarks>
-	/// <para>
-	/// The minimum requirement for a class to be considered a valid package for Visual Studio
-	/// is to implement the IVsPackage interface and register itself with the shell.
-	/// This package uses the helper classes defined inside the Managed Package Framework (MPF)
-	/// to do it: it derives from the Package class that provides the implementation of the
-	/// IVsPackage interface and uses the registration attributes defined in the framework to
-	/// register itself and its components with the shell. These attributes tell the pkgdef creation
-	/// utility what data to put into .pkgdef file.
-	/// </para>
-	/// <para>
-	/// To get loaded into VS, the package must be referred by &lt;Asset Type="Microsoft.VisualStudio.VsPackage" ...&gt; in .vsixmanifest file.
-	/// </para>
-	/// </remarks>
 	[PackageRegistration(UseManagedResourcesOnly = true)]
-	[InstalledProductRegistration("#110", "#112", "1.0", IconResourceID = 400)] // Info on this package for Help/About
+	[InstalledProductRegistration("#110", "#112", "2.0", IconResourceID = 400)] // Info on this package for Help/About
 	[Guid(MinimalisticView.PackageGuidString)]
-	[SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "pkgdef, VS and vsixmanifest are valid VS terms")]
 	[ProvideAutoLoad(UIContextGuids.NoSolution)]
 	[ProvideAutoLoad(UIContextGuids.SolutionExists)]
-	public sealed class MinimalisticView : Package
+	// todo: ensure that it correctly handles localized "Environment" category
+	[ProvideOptionPage(typeof(OptionPage), "Environment", "MinimalisticView", 0, 0, true, new[] { "MinimalisticView", "menu", "tab" })]
+	public sealed partial class MinimalisticView : Package
 	{
-		/// <summary>
-		/// MinimalisticView GUID string.
-		/// </summary>
 		public const string PackageGuidString = "a06e17e0-8f3f-4625-ac80-b80e2b4a0699";
+
+		private bool _isMenuVisible;
+		public bool IsMenuVisible
+		{
+			get {
+				return _isMenuVisible;
+			}
+			set {
+				if (_isMenuVisible == value)
+					return;
+				_isMenuVisible = value;
+				UpdateElementHeight(_menuBar);
+				UpdateElementHeight(_titleBar, Options.CollapsedTitleHeight);
+			}
+		}
+
+		private FrameworkElement _menuBar;
+		public FrameworkElement MenuBar
+		{
+			get {
+				return _menuBar;
+			}
+			set {
+				_menuBar = value;
+				UpdateElementHeight(_menuBar);
+				AddElementHandlers(_menuBar);
+			}
+		}
+
+		private FrameworkElement _titleBar;
+		public FrameworkElement TitleBar
+		{
+			get {
+				return _titleBar;
+			}
+			set {
+				_titleBar = value;
+				UpdateElementHeight(_titleBar, Options.CollapsedTitleHeight);
+				AddElementHandlers(_titleBar);
+			}
+		}
+
+		private OptionPage _options;
+		public OptionPage Options
+		{
+			get {
+				if (_options == null) {
+					_options = (OptionPage)GetDialogPage(typeof(OptionPage));
+				}
+				return _options;
+			}
+		}
+
+		private ResourceDictionary _resourceOverrides;
+		public ResourceDictionary ResourceOverrides {
+			get {
+				if (_resourceOverrides == null) {
+					_resourceOverrides = Extensions.LoadResourceValue<ResourceDictionary>("StyleOverrides.xaml");
+				}
+				return _resourceOverrides;
+			}
+		}
+
+		private NonClientMouseTracker _nonClientTracker;
+		private Window _mainWindow;
+		
+
+		void UpdateElementHeight(FrameworkElement element, double collapsedHeight = 0)
+		{
+			if (element == null) {
+				return;
+			}
+			if (IsMenuVisible || !Options.TitleBarAutoHide) {
+				element.ClearValue(FrameworkElement.HeightProperty);
+			} else {
+				element.Height = collapsedHeight;
+			}
+		}
+
+		void AddElementHandlers(FrameworkElement element)
+		{
+			if (element == null) {
+				return;
+			}
+			element.IsKeyboardFocusWithinChanged += OnContainerFocusChanged;
+			element.MouseEnter += OnIsMouseOverChanged;
+			element.MouseLeave += OnIsMouseOverChanged;
+		}
+
+		private void OnContainerFocusChanged(object sender, DependencyPropertyChangedEventArgs e)
+		{
+			IsMenuVisible = IsAggregateFocusInMenuContainer();
+		}
+
+		private void PopupLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+		{
+			if (IsMenuVisible && MenuBar != null && !IsAggregateFocusInMenuContainer()) {
+				IsMenuVisible = false;
+			}
+		}
+
+		private async void OnIsMouseOverChanged(object sender, MouseEventArgs e)
+		{
+			await System.Threading.Tasks.Task.Delay(1); // Workaround for mouse transition issues between client and non-client area (when both areas have IsMouseOver set to false)
+			IsMenuVisible = (_titleBar?.IsMouseOver ?? false) || (_menuBar?.IsMouseOver ?? false) || _nonClientTracker.IsMouseOver || IsAggregateFocusInMenuContainer();
+		}
+
+		private bool IsAggregateFocusInMenuContainer()
+		{
+			if (MenuBar.IsKeyboardFocusWithin || TitleBar.IsKeyboardFocusWithin)
+				return true;
+			for (DependencyObject sourceElement = (DependencyObject)Keyboard.FocusedElement; sourceElement != null; sourceElement = sourceElement.GetVisualOrLogicalParent()) {
+				if (sourceElement == MenuBar || sourceElement == TitleBar)
+					return true;
+			}
+			return false;
+		}
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="MinimalisticView"/> class.
@@ -55,8 +160,6 @@ namespace MinimalisticView
 			// initialization is the Initialize method.
 		}
 
-		#region Package Members
-
 		/// <summary>
 		/// Initialization of the package; this method is called right after the package is sited, so this is the place
 		/// where you can put all the initialization code that rely on services provided by VisualStudio.
@@ -64,22 +167,67 @@ namespace MinimalisticView
 		protected override void Initialize()
 		{
 			base.Initialize();
-			MergeResources();
-		}
-
-		private void MergeResources()
-		{
-			if (Application.Current == null) {
-				throw new InvalidOperationException("We need an application set.");
+			_mainWindow = Application.Current.MainWindow;
+			if (_mainWindow == null) {
+				Trace.TraceError("mainWindow is null");
+				return;
 			}
-			Application.Current.Resources.MergedDictionaries.Add(LoadResourceValue<ResourceDictionary>("StyleOverrides.xaml"));
+			if (Options.HideTabs) {
+				Application.Current.Resources.MergedDictionaries.Add(ResourceOverrides);
+			}
+			_mainWindow.LayoutUpdated += DetectLayoutElements;
+			_nonClientTracker = new NonClientMouseTracker(_mainWindow);
+			_nonClientTracker.MouseEnter += () => OnIsMouseOverChanged(null, null);
+			_nonClientTracker.MouseLeave += () => OnIsMouseOverChanged(null, null);
+			EventManager.RegisterClassHandler(typeof(UIElement), UIElement.LostKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(PopupLostKeyboardFocus));
+			Options.PropertyChanged += OptionsChanged;
 		}
 
-		private static T LoadResourceValue<T>(string xamlName)
+		private void OptionsChanged(object sender, PropertyChangedEventArgs e)
 		{
-			return (T)((object)Application.LoadComponent(new Uri(Assembly.GetExecutingAssembly().GetName().Name + ";component/" + xamlName, UriKind.Relative)));
+			switch (e.PropertyName) {
+				case nameof(Options.CollapsedTitleHeight):
+					UpdateElementHeight(_titleBar, Options.CollapsedTitleHeight);
+					break;
+				case nameof(Options.TitleBarAutoHide):
+					UpdateElementHeight(_menuBar);
+					UpdateElementHeight(_titleBar, Options.CollapsedTitleHeight);
+					break;
+				case nameof(Options.HideTabs):
+					var dics = Application.Current.Resources.MergedDictionaries;
+					if (Options.HideTabs && !dics.Contains(ResourceOverrides)) {
+						dics.Add(ResourceOverrides);
+					}
+					if (!Options.HideTabs && dics.Contains(ResourceOverrides)) {
+						dics.Remove(ResourceOverrides);
+					}
+					break;
+			}
 		}
 
-		#endregion
+		private void DetectLayoutElements(object sender, EventArgs e)
+		{
+			if (MenuBar == null) {
+				foreach (var descendant in _mainWindow.FindDescendants<Menu>()) {
+					if (AutomationProperties.GetAutomationId(descendant) == "MenuBar") {
+						FrameworkElement frameworkElement = descendant;
+						var parent = descendant.GetVisualOrLogicalParent();
+						if (parent != null)
+							frameworkElement = parent.GetVisualOrLogicalParent() as DockPanel ?? frameworkElement;
+						MenuBar = frameworkElement;
+						break;
+					}
+				}
+			}
+			if (TitleBar == null) {
+				var titleBar = _mainWindow.FindDescendants<MainWindowTitleBar>().FirstOrDefault();
+				if (titleBar != null) {
+					TitleBar = titleBar;
+				}
+			}
+			if (TitleBar != null && MenuBar != null) {
+				_mainWindow.LayoutUpdated -= DetectLayoutElements;
+			}
+		}
 	}
 }
