@@ -20,7 +20,7 @@ namespace MinimalisticView
 	[ProvideAutoLoad(UIContextGuids.NoSolution)]
 	[ProvideAutoLoad(UIContextGuids.SolutionExists)]
 	// todo: ensure that it correctly handles localized "Environment" category
-	[ProvideOptionPage(typeof(OptionPage), "Environment", "MinimalisticView", 0, 0, true, new[] { "MinimalisticView", "menu", "tab" })]
+	[ProvideOptionPage(typeof(OptionPage), "Environment", "MinimalisticView", 0, 0, true, new[] { "MinimalisticView", "menu", "tab", "title", "hide" })]
 	public sealed partial class MinimalisticView : Package
 	{
 		public const string PackageGuidString = "a06e17e0-8f3f-4625-ac80-b80e2b4a0699";
