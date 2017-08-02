@@ -11,6 +11,7 @@ using System.Windows.Input;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+using System.Windows.Threading;
 
 namespace MinimalisticView
 {
@@ -89,7 +90,9 @@ namespace MinimalisticView
 
 		private NonClientMouseTracker _nonClientTracker;
 		private Window _mainWindow;
-		
+		private DispatcherTimer _mouseEnterTimer;
+		private DispatcherTimer _mouseLeaveTimer;
+
 
 		void UpdateMenuHeight()
 		{
@@ -102,7 +105,7 @@ namespace MinimalisticView
 				UpdateElementHeight(_titleBar, Options.CollapsedTitleHeight);
 			} else {
 				_titleBar.ClearValue(FrameworkElement.HeightProperty);
-			}			
+			}
 		}
 
 		void UpdateElementHeight(FrameworkElement element, double collapsedHeight = 0)
@@ -142,7 +145,21 @@ namespace MinimalisticView
 		private async void OnIsMouseOverChanged(object sender, MouseEventArgs e)
 		{
 			await System.Threading.Tasks.Task.Delay(1); // Workaround for mouse transition issues between client and non-client area (when both areas have IsMouseOver set to false)
-			IsMenuVisible = ((_titleBar?.IsMouseOver ?? false) && !Options.HideMenuOnly) || (_menuBar?.IsMouseOver ?? false) || (_nonClientTracker.IsMouseOver && !Options.HideMenuOnly) || IsAggregateFocusInMenuContainer();
+			var IsMouseOver = (_menuBar?.IsMouseOver ?? false) || (!Options.HideMenuOnly && (_nonClientTracker.IsMouseOver || (_titleBar?.IsMouseOver ?? false)));
+
+			// reset timers
+			if (IsMouseOver) {
+				_mouseLeaveTimer.IsEnabled = false;
+			} else {
+				_mouseEnterTimer.IsEnabled = false;
+			}
+
+			if (IsMenuVisible && !IsMouseOver) {
+				_mouseLeaveTimer.IsEnabled = true;
+			}
+			if (!IsMenuVisible && IsMouseOver) {
+				_mouseEnterTimer.IsEnabled = true;
+			}
 		}
 
 		private bool IsAggregateFocusInMenuContainer()
@@ -154,6 +171,20 @@ namespace MinimalisticView
 					return true;
 			}
 			return false;
+		}
+
+		private void _mouseEnterTimer_Tick(object sender, EventArgs e)
+		{
+			_mouseEnterTimer.IsEnabled = false;
+			IsMenuVisible = true;
+		}
+
+		private void _mouseLeaveTimer_Tick(object sender, EventArgs e)
+		{
+			_mouseLeaveTimer.IsEnabled = false;
+			if (!IsAggregateFocusInMenuContainer()) {
+				IsMenuVisible = false;
+			}
 		}
 
 		/// <summary>
@@ -187,6 +218,10 @@ namespace MinimalisticView
 			_nonClientTracker.MouseEnter += () => OnIsMouseOverChanged(null, null);
 			_nonClientTracker.MouseLeave += () => OnIsMouseOverChanged(null, null);
 			EventManager.RegisterClassHandler(typeof(UIElement), UIElement.LostKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(PopupLostKeyboardFocus));
+			_mouseEnterTimer = new DispatcherTimer { IsEnabled = false, Interval = TimeSpan.FromMilliseconds(Options.MouseEnterDelay) };
+			_mouseLeaveTimer = new DispatcherTimer { IsEnabled = false, Interval = TimeSpan.FromMilliseconds(Options.MouseLeaveDelay) };
+			_mouseEnterTimer.Tick += _mouseEnterTimer_Tick;
+			_mouseLeaveTimer.Tick += _mouseLeaveTimer_Tick;
 			Options.PropertyChanged += OptionsChanged;
 		}
 
@@ -209,6 +244,12 @@ namespace MinimalisticView
 					if (!Options.HideTabs && dics.Contains(ResourceOverrides)) {
 						dics.Remove(ResourceOverrides);
 					}
+					break;
+				case nameof(Options.MouseEnterDelay):
+					_mouseEnterTimer.Interval = TimeSpan.FromMilliseconds(Options.MouseEnterDelay);
+					break;
+				case nameof(Options.MouseLeaveDelay):
+					_mouseLeaveTimer.Interval = TimeSpan.FromMilliseconds(Options.MouseLeaveDelay);
 					break;
 			}
 		}

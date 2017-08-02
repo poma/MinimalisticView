@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.Shell;
+﻿using System;
+using Microsoft.VisualStudio.Shell;
 using System.ComponentModel;
 
 namespace MinimalisticView
@@ -72,8 +73,44 @@ namespace MinimalisticView
 					return;
 				}
 
-				_collapsedTitleHeight = value;
+				_collapsedTitleHeight = Math.Max(value, 0);
 				PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CollapsedTitleHeight)));
+			}
+		}
+
+		int _mouseEnterDelay = 0;
+		[DisplayName("Mouse enter delay")]
+		[Description("Delay after mouse enters collapsed menu and before menu pops up")]
+		public int MouseEnterDelay
+		{
+			get {
+				return _mouseEnterDelay;
+			}
+			set {
+				if (_mouseEnterDelay == value) {
+					return;
+				}
+
+				_mouseEnterDelay = Math.Max(value, 0);
+				PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MouseEnterDelay)));
+			}
+		}
+
+		int _mouseLeaveDelay = 0;
+		[DisplayName("Mouse leave delay")]
+		[Description("Delay after mouse leaves menu and before menu collapses back")]
+		public int MouseLeaveDelay
+		{
+			get {
+				return _mouseLeaveDelay;
+			}
+			set {
+				if (_mouseLeaveDelay == value) {
+					return;
+				}
+
+				_mouseLeaveDelay = Math.Max(value, 0);
+				PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MouseLeaveDelay)));
 			}
 		}
 		public event PropertyChangedEventHandler PropertyChanged;
