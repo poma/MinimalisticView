@@ -108,11 +108,12 @@
     </Reference>
     <Reference Include="Microsoft.VisualStudio.Shell.UI.Internal, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Microsoft.VisualStudio.Shell.UI.Internal.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\IDE\Microsoft.VisualStudio.Shell.UI.Internal.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.VisualStudio.Shell.ViewManager">
       <HintPath>C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\IDE\Microsoft.VisualStudio.Shell.ViewManager.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.VisualStudio.Threading, Version=15.8.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="Microsoft.VisualStudio.Utilities, Version=15.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="WindowsBase" />
