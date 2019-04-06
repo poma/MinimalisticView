@@ -69,6 +69,18 @@ namespace MinimalisticView
 			}
 		}
 
+		private FrameworkElement _feedbackPanel;
+		public FrameworkElement FeedbackPanel
+		{
+			get {
+				return _feedbackPanel;
+			}
+			set {
+				_feedbackPanel = value;
+				UpdateFeedbackVisibility();
+			}
+		}
+
 		private OptionPage _options;
 		public OptionPage Options
 		{
@@ -108,6 +120,11 @@ namespace MinimalisticView
 			} else {
 				_titleBar.ClearValue(FrameworkElement.HeightProperty);
 			}
+		}
+
+		void UpdateFeedbackVisibility()
+		{
+			_feedbackPanel.Visibility = Options.HideFeedback ? Visibility.Collapsed : Visibility.Visible;
 		}
 
 		void UpdateElementHeight(FrameworkElement element, double collapsedHeight = 0)
@@ -240,6 +257,9 @@ namespace MinimalisticView
 					UpdateMenuHeight();
 					UpdateTitleHeight();
 					break;
+				case nameof(Options.HideFeedback):
+					UpdateFeedbackVisibility();
+					break;
 				case nameof(Options.HideTabs):
 					var dics = Application.Current.Resources.MergedDictionaries;
 					if (Options.HideTabs && !dics.Contains(ResourceOverrides)) {
@@ -277,6 +297,9 @@ namespace MinimalisticView
 				if (titleBar != null) {
 					TitleBar = titleBar;
 				}
+			}
+			if (FeedbackPanel == null) {
+				FeedbackPanel = Application.Current.MainWindow.FindElement("FrameControlContainerBorder");
 			}
 			if (TitleBar != null && MenuBar != null) {
 				_mainWindow.LayoutUpdated -= DetectLayoutElements;

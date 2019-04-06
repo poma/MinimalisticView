@@ -51,5 +51,25 @@ namespace MinimalisticView
 					action(obj1);
 			}
 		}
+
+		public static FrameworkElement FindElement(this Visual v, string name)
+		{
+			if (v == null)
+				return null;
+			for (var i = 0; i < VisualTreeHelper.GetChildrenCount(v); ++i)
+			{
+				var child = VisualTreeHelper.GetChild(v, i) as Visual;
+				if (child != null)
+				{
+					var e = child as FrameworkElement;
+					if (e != null && e.Name == name)
+						return e;
+				}
+				var result = FindElement(child, name);
+				if (result != null)
+					return result;
+			}
+			return null;
+		}
 	}
 }
