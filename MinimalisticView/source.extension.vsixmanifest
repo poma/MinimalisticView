@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
   <Metadata>
-    <Identity Id="MinimalisticView.Company.ba901288-7632-4116-b9e7-c9d29f495474" Version="3.0" Language="en-US" Publisher="Roman Semenov" />
+    <Identity Id="MinimalisticView.Company.ba901288-7632-4116-b9e7-c9d29f495474" Version="3.1" Language="en-US" Publisher="Roman Semenov" />
     <DisplayName>Hide Main Menu, Title Bar, and Tabs</DisplayName>
     <Description xml:space="preserve">Hides main menu and title bar when not in use, can also hide tabs. Menu and title behave as a single panel and are shown on mouse over or alt/ctrl-q shortcuts. Has configurable options.</Description>
     <MoreInfo>https://marketplace.visualstudio.com/items?itemName=Poma.MinimalisticView</MoreInfo>
