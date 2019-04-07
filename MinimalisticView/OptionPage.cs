@@ -60,24 +60,6 @@ namespace MinimalisticView
 			}
 		}
 
-		bool _hideFeedback = true;
-		[DisplayName("Hide feedback button")]
-		[Description("Hide Feedback button panel")]
-		public bool HideFeedback
-		{
-			get {
-				return _hideFeedback;
-			}
-			set {
-				if (_hideFeedback == value) {
-					return;
-				}
-
-				_hideFeedback = value;
-				PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(HideFeedback)));
-			}
-		}
-
 		int _collapsedTitleHeight = 2;
 		[DisplayName("Collapsed title height")]
 		[Description("Height of collapsed title bar. If set to zero removes it completely but menu cannot expand on mouse over.")]

@@ -7,7 +7,7 @@ using System.Windows.Interop;
 
 namespace MinimalisticView
 {
-	public sealed partial class MinimalisticView : AsyncPackage
+	public sealed partial class MinimalisticView : Package
 	{
 		public class NonClientMouseTracker
 		{
