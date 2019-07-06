@@ -124,7 +124,9 @@ namespace MinimalisticView
 
 		void UpdateFeedbackVisibility()
 		{
-			_feedbackPanel.Visibility = Options.HideFeedback ? Visibility.Collapsed : Visibility.Visible;
+			if (_feedbackPanel != null) {
+				_feedbackPanel.Visibility = Options.HideFeedback ? Visibility.Collapsed : Visibility.Visible;
+			}
 		}
 
 		void UpdateElementHeight(FrameworkElement element, double collapsedHeight = 0)
