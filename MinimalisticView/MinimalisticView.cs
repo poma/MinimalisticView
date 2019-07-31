@@ -12,17 +12,19 @@ using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using System.Windows.Threading;
+using System.Threading;
+using Task = System.Threading.Tasks.Task;
 
 namespace MinimalisticView
 {
-	[PackageRegistration(UseManagedResourcesOnly = true)]
+	[PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
 	[InstalledProductRegistration("#110", "#112", "2.2", IconResourceID = 400)] // Info on this package for Help/About
 	[Guid(MinimalisticView.PackageGuidString)]
-	[ProvideAutoLoad(UIContextGuids.NoSolution)]
-	[ProvideAutoLoad(UIContextGuids.SolutionExists)]
+	[ProvideAutoLoad(UIContextGuids.NoSolution, PackageAutoLoadFlags.BackgroundLoad)]
+	[ProvideAutoLoad(UIContextGuids.SolutionExists, PackageAutoLoadFlags.BackgroundLoad)]
 	// todo: ensure that it correctly handles localized "Environment" category
 	[ProvideOptionPage(typeof(OptionPage), "Environment", "MinimalisticView", 0, 0, true, new[] { "MinimalisticView", "menu", "tab", "title", "hide" })]
-	public sealed partial class MinimalisticView : Package
+	public sealed partial class MinimalisticView : AsyncPackage
 	{
 		public const string PackageGuidString = "a06e17e0-8f3f-4625-ac80-b80e2b4a0699";
 
@@ -67,6 +69,18 @@ namespace MinimalisticView
 			}
 		}
 
+		private FrameworkElement _feedbackPanel;
+		public FrameworkElement FeedbackPanel
+		{
+			get {
+				return _feedbackPanel;
+			}
+			set {
+				_feedbackPanel = value;
+				UpdateFeedbackVisibility();
+			}
+		}
+
 		private OptionPage _options;
 		public OptionPage Options
 		{
@@ -105,6 +119,13 @@ namespace MinimalisticView
 				UpdateElementHeight(_titleBar, Options.CollapsedTitleHeight);
 			} else {
 				_titleBar.ClearValue(FrameworkElement.HeightProperty);
+			}
+		}
+
+		void UpdateFeedbackVisibility()
+		{
+			if (_feedbackPanel != null) {
+				_feedbackPanel.Visibility = Options.HideFeedback ? Visibility.Collapsed : Visibility.Visible;
 			}
 		}
 
@@ -202,9 +223,11 @@ namespace MinimalisticView
 		/// Initialization of the package; this method is called right after the package is sited, so this is the place
 		/// where you can put all the initialization code that rely on services provided by VisualStudio.
 		/// </summary>
-		protected override void Initialize()
+		protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
 		{
-			base.Initialize();
+			await base.InitializeAsync(cancellationToken, progress);
+			await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+
 			_mainWindow = Application.Current.MainWindow;
 			if (_mainWindow == null) {
 				Trace.TraceError("mainWindow is null");
@@ -235,6 +258,9 @@ namespace MinimalisticView
 				case nameof(Options.HideMenuOnly):
 					UpdateMenuHeight();
 					UpdateTitleHeight();
+					break;
+				case nameof(Options.HideFeedback):
+					UpdateFeedbackVisibility();
 					break;
 				case nameof(Options.HideTabs):
 					var dics = Application.Current.Resources.MergedDictionaries;
@@ -273,6 +299,9 @@ namespace MinimalisticView
 				if (titleBar != null) {
 					TitleBar = titleBar;
 				}
+			}
+			if (FeedbackPanel == null) {
+				FeedbackPanel = Application.Current.MainWindow.FindElement("FrameControlContainerBorder");
 			}
 			if (TitleBar != null && MenuBar != null) {
 				_mainWindow.LayoutUpdated -= DetectLayoutElements;
