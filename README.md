@@ -1,5 +1,7 @@
 # MinimalisticView
 
+❗ **Looking for maintainers.** I use Visual Studio pretty rarely nowdays, would be cool if someone takes over the support of this plugin.
+
 [VS Marketplace page](https://marketplace.visualstudio.com/items?itemName=Poma.MinimalisticView)
 
 This extension hides Menu bar, Title bar, and Tab Well. Menu and title bar are in auto-hide mode and are accessible if you press "Alt" or "Ctrl-Q" hotkey or hover mouse over window top. Tabs can also be hidden and you can easily switch between them using Ctrl-Tab or Ctrl-, and other navigation hotkeys.
