@@ -1,25 +1,30 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
-  <Metadata>
-    <Identity Id="MinimalisticView.Company.ba901288-7632-4116-b9e7-c9d29f495474" Version="3.1" Language="en-US" Publisher="Roman Semenov" />
-    <DisplayName>Hide Main Menu, Title Bar, and Tabs</DisplayName>
-    <Description xml:space="preserve">Hides main menu and title bar when not in use, can also hide tabs. Menu and title behave as a single panel and are shown on mouse over or alt/ctrl-q shortcuts. Has configurable options.</Description>
-    <MoreInfo>https://marketplace.visualstudio.com/items?itemName=Poma.MinimalisticView</MoreInfo>
-    <Icon>Resources\Icon.png</Icon>
-    <PreviewImage>Resources\Preview.png</PreviewImage>
-    <Tags>TabStrip, menu, tabs, hide menu, collapse, hide, Main Menu, Title Bar, titlebar, hide tabs, hide title</Tags>
-  </Metadata>
-  <Installation>
-    <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[15.0,17.0)" />
-  </Installation>
-  <Dependencies>
-    <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="[4.6,)" />
-    <Dependency Id="Microsoft.VisualStudio.MPF.14.0" DisplayName="Visual Studio MPF 14.0" d:Source="Installed" Version="[14.0]" />
-  </Dependencies>
-  <Assets>
-    <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%;PkgdefProjectOutputGroup|" />
-  </Assets>
-  <Prerequisites>
-    <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[15.0,17.0)" DisplayName="Visual Studio core editor" />
-  </Prerequisites>
+	<Metadata>
+		<Identity Id="MinimalisticView.Company.ba901288-7632-4116-b9e7-c9d29f495474" Version="3.1" Language="en-US" Publisher="Roman Semenov" />
+		<DisplayName>Hide Main Menu, Title Bar, and Tabs</DisplayName>
+		<Description xml:space="preserve">Hides main menu and title bar when not in use, can also hide tabs. Menu and title behave as a single panel and are shown on mouse over or alt/ctrl-q shortcuts. Has configurable options.</Description>
+		<MoreInfo>https://marketplace.visualstudio.com/items?itemName=Poma.MinimalisticView</MoreInfo>
+		<Icon>Resources\Icon.png</Icon>
+		<PreviewImage>Resources\Preview.png</PreviewImage>
+		<Tags>TabStrip, menu, tabs, hide menu, collapse, hide, Main Menu, Title Bar, titlebar, hide tabs, hide title</Tags>
+	</Metadata>
+	<Installation>
+		<InstallationTarget Version="[17.0,18.0)" Id="Microsoft.VisualStudio.Community">
+			<ProductArchitecture>amd64</ProductArchitecture>
+		</InstallationTarget>
+		<InstallationTarget Version="[15.0,17.0)" Id="Microsoft.VisualStudio.Community">
+			<ProductArchitecture>x86</ProductArchitecture>
+		</InstallationTarget>
+	</Installation>
+	<Dependencies>
+		<Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="[4.7.2,)" />
+		<Dependency Id="Microsoft.VisualStudio.MPF.14.0" DisplayName="Visual Studio MPF 14.0" d:Source="Installed" Version="[14.0]" />
+	</Dependencies>
+	<Assets>
+		<Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%;PkgdefProjectOutputGroup|" />
+	</Assets>
+	<Prerequisites>
+		<Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[15.0,18.0)" DisplayName="Visual Studio core editor" />
+	</Prerequisites>
 </PackageManifest>
